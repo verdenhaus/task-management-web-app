@@ -1,18 +1,13 @@
 .card {
-    border: 1px solid #ccc;
+    background: #2a2a3f;
     padding: 1rem;
+    border-radius: 8px;
     margin-bottom: 0.5rem;
+    cursor: pointer;
+    color: #fff;
   }
   
-  .high {
-    background-color: #ffcccc;
-  }
-  
-  .medium {
-    background-color: #fff4cc;
-  }
-  
-  .low {
-    background-color: #ccffcc;
-  }
+  .card.low { background-color: #8fc8ff; color: #000; }
+  .card.medium { background-color: #ffd88f; color: #000; }
+  .card.high { background-color: #ff8f8f; color: #000; }
   

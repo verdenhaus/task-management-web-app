@@ -1,2 +1,3 @@
-const LoginPage = () => <h1>Login Page</h1>;
+import UserLogin from '../components/UserLogin';
+const LoginPage = () => <UserLogin />
 export default LoginPage;
