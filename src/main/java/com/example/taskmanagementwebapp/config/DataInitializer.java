@@ -9,6 +9,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
 @Component
 public class DataInitializer implements CommandLineRunner {
 
@@ -23,9 +25,11 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     public void run(String... args) {
         if (userRepo.count() == 0) {
-            User u1 = new User("Alice", "alice@mail.ru", "12345678", "AVAILABLE");
-            User u2 = new User("Mia", "mia@mail.ru", "12345678", "AVAILABLE");
-            User u3 = new User("Luna", "luna@mail.ru", "12345678", "BUSY");
+            BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+
+            User u1 = new User("Alice", "alice@mail.ru", encoder.encode("12345678"), "AVAILABLE");
+            User u2 = new User("Mia", "mia@mail.ru", encoder.encode("12345678"), "AVAILABLE");
+            User u3 = new User("Luna", "luna@mail.ru", encoder.encode("12345678"), "BUSY");
             userRepo.saveAll(List.of(u1, u2, u3));
 
             Task t1 = new Task("Fix login bug", "Resolve login redirect issue", "HIGH");
