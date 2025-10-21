@@ -6,6 +6,7 @@ import com.example.taskmanagementwebapp.service.TaskService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/tasks")
@@ -35,4 +36,25 @@ public class TaskController {
     public ResponseEntity<TaskDto> assign(@PathVariable Long id) {
         return ResponseEntity.ok(taskService.assignAuto(id));
     }
+
+    @PostMapping("/{id}/status")
+    public ResponseEntity<TaskDto> updateStatus(@PathVariable Long id, @RequestBody Map<String, String> body) {
+        String newStatus = body.get("status");
+        if (newStatus == null || newStatus.isBlank()) {
+            return ResponseEntity.badRequest().build();
+        }
+        TaskDto updated = taskService.updateStatus(id, newStatus);
+        return ResponseEntity.ok(updated);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<TaskDto> updateTask(
+            @PathVariable Long id,
+            @RequestBody TaskDto updatedTaskDto
+    ) {
+        TaskDto updated = taskService.updateTask(id, updatedTaskDto);
+        return ResponseEntity.ok(updated);
+    }
+
+
 }

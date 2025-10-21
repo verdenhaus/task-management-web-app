@@ -16,11 +16,24 @@ public interface UserRepository extends JpaRepository<User, Long> {
     // Find by email for login/registration
     Optional<User> findByEmail(String email);
 
+    Optional<User> findByUsername(String username);
+
     // Check if a user with this email already exists
     boolean existsByEmail(String email);
 
     // Find users by partial username for search
     List<User> findByUsernameContainingIgnoreCase(String keyword);
+
+    @Query("""
+    SELECT u FROM User u
+    LEFT JOIN u.tasks t
+    WHERE t.status IS NULL OR t.status <> 'COMPLETE' OR t IS NULL
+    GROUP BY u
+    HAVING COUNT(t) < 3
+    ORDER BY COUNT(t) ASC
+""")
+    List<User> findAvailableForAutoAssign();
+
 
     // Find available users
     @Query("SELECT u FROM User u WHERE u.availabilityStatus = 'AVAILABLE'")

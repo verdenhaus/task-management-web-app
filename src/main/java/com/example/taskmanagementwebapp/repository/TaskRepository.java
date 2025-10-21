@@ -32,6 +32,9 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     // Pageable + filtering example
     Page<Task> findByPriorityLevel(String priorityLevel, Pageable pageable);
 
+    long countByAssignedUserIdAndStatusNot(Long userId, Task.Status status);
+
+
     // Reassign or clear a task’s user
     @Transactional
     @Modifying

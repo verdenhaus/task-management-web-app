@@ -26,6 +26,16 @@ public class Task {
     @JoinColumn(name = "assigned_user_id")
     private User assignedUser;
 
+    @Enumerated(EnumType.STRING)
+    private Status status = Status.ASSIGNED; // default to ASSIGNED
+
+    public enum Status {
+        ASSIGNED,
+        IN_PROGRESS,
+        TESTING,
+        COMPLETE
+    }
+
     public Task() {}
 
     public Task(String title, String description, String priorityLevel) {
@@ -34,7 +44,7 @@ public class Task {
         this.priorityLevel = priorityLevel;
     }
 
-    // Getters and setters
+    // Getters & setters
     public Long getId() { return id; }
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
@@ -43,6 +53,9 @@ public class Task {
     public String getPriorityLevel() { return priorityLevel; }
     public void setPriorityLevel(String priorityLevel) { this.priorityLevel = priorityLevel; }
     public LocalDateTime getCreationTimestamp() { return creationTimestamp; }
+    public void setCreationTimestamp(LocalDateTime creationTimestamp) { this.creationTimestamp = creationTimestamp; }
     public User getAssignedUser() { return assignedUser; }
     public void setAssignedUser(User assignedUser) { this.assignedUser = assignedUser; }
+    public Status getStatus() { return status; }
+    public void setStatus(Status status) { this.status = status; }
 }
