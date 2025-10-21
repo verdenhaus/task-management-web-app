@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import TaskCard from '../components/TaskCard';
@@ -6,6 +7,7 @@ import TaskModal from '../components/TaskModal';
 import styles from './DashboardPage.module.css';
 
 const DashboardPage = () => {
+  const navigate = useNavigate();
   const [tasks, setTasks] = useState([]);
   const [users, setUsers] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
@@ -58,11 +60,21 @@ const DashboardPage = () => {
   const onDragEnd = async (result) => {
     const { destination, source, draggableId } = result;
     if (!destination) return;
-
-    if (destination.droppableId === source.droppableId && destination.index === source.index) return;
-
+  
+    if (destination.droppableId === source.droppableId && destination.index === source.index)
+      return;
+  
     const taskId = parseInt(draggableId);
-
+  
+    const taskToMove = tasks.find(t => t.id === taskId);
+    if (!taskToMove) return;
+    if (!currentUser || taskToMove.assignedUserId !== currentUser.id) {
+      setErrorMessage("You can't change the status of other people's tasks.");
+      setShowError(true);
+      setTimeout(() => setShowError(false), 3000);
+      return;
+    }
+  
     let newStatus = '';
     if (destination.droppableId.startsWith('user-')) {
       const parts = destination.droppableId.split('-');
@@ -70,42 +82,65 @@ const DashboardPage = () => {
     } else {
       newStatus = destination.droppableId.replace('status-', '');
     }
-
+  
     const updatedTasks = tasks.map(task =>
       task.id === taskId ? { ...task, status: newStatus } : task
     );
     setTasks(updatedTasks);
-
+  
     try {
-      await axios.put(`/api/tasks/${taskId}`, { status: newStatus }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await axios.post(
+        `/api/tasks/${taskId}/status`,
+        { status: newStatus },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
     } catch (err) {
-      console.error(err);
+      console.error('Failed to update task status:', err);
       setTasks(tasks);
-      setErrorMessage("You can't change the status of other people's tasks.");
+      setErrorMessage('Failed to update task status. Please try again.');
       setShowError(true);
       setTimeout(() => setShowError(false), 3000);
     }
   };
+  
 
   const handleSaveTask = async (taskData) => {
     try {
+      let savedTask;
+  
       if (taskData.id) {
-        await axios.put(`/api/tasks/${taskData.id}`, taskData, { headers: { Authorization: `Bearer ${token}` } });
+        const res = await axios.put(`/api/tasks/${taskData.id}`, taskData, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        savedTask = res.data;
       } else {
-        await axios.post('/api/tasks', taskData, { headers: { Authorization: `Bearer ${token}` } });
+        const res = await axios.post('/api/tasks', taskData, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        savedTask = res.data;
       }
-
-      const tasksRes = await axios.get('/api/tasks', { headers: { Authorization: `Bearer ${token}` } });
+  
+      if (taskData.autoAssign) {
+        await axios.post(
+          `/api/tasks/assign/${savedTask.id}`,
+          {},
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+      }
+  
+      
+      const tasksRes = await axios.get('/api/tasks', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       setTasks(tasksRes.data);
     } catch (err) {
       console.error(err);
-      alert("Failed to save task");
+      alert('Failed to save task');
     } finally {
       setModalOpen(false);
     }
   };
+  
 
   if (loading) return <p>Loading dashboard...</p>;
   if (!currentUser) return <p>Loading user data...</p>;
@@ -182,14 +217,22 @@ const DashboardPage = () => {
     <div className={styles.container}>
       <header className={styles.header}>
         <h1>Dashboard</h1>
-        <button
-          onClick={() => {
-            setEditingTask(null);
-            setModalOpen(true);
-          }}
-        >
-          + Create Task
-        </button>
+        <div className={styles.headerButtons}>
+          <button
+            onClick={() => {
+              setEditingTask(null);
+              setModalOpen(true);
+            }}
+          >
+            + Create Task
+          </button>
+          <button
+            onClick={() => navigate('/profile')}
+            className={styles.profileButton}
+          >
+            👤 Profile
+          </button>
+        </div>
       </header>
 
       <DragDropContext onDragEnd={onDragEnd}>

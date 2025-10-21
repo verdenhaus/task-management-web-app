@@ -12,7 +12,7 @@
     background: #1e1e2f;
     padding: 2rem;
     border-radius: 12px;
-    width: 400px;
+    width: 420px;
     color: #ddd;
     font-family: sans-serif;
   }
@@ -20,15 +20,21 @@
   .modal h2 {
     margin-top: 0;
     color: #d6c9ff;
+    text-align: center;
+  }
+  
+  .form {
+    display: flex;
+    flex-direction: column;
   }
   
   .modal label {
-    display: block;
     margin-top: 1rem;
+    display: block;
+    font-weight: bold;
   }
   
   .modal input[type="text"],
-  .modal input[type="email"],
   .modal textarea,
   .modal select {
     width: 100%;
@@ -38,6 +44,7 @@
     border: 1px solid #555;
     background: #2a2a3f;
     color: #fff;
+    box-sizing: border-box;
   }
   
   .modal textarea {
@@ -45,8 +52,11 @@
     min-height: 60px;
   }
   
-  .modal .searchInput {
-    margin-top: 0.5rem;
+  .autoAssignRow {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
   }
   
   .buttons {
@@ -73,8 +83,58 @@
     background: #555;
     color: #fff;
   }
-  
 
+  .checkboxRow {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  margin-left: 0.1rem;
+}
+
+.checkboxRow input[type="checkbox"] {
+  margin: 0;
+  transform: scale(1.1);
+}
+
+.checkboxRow label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 550;
+  color: #ddd;
+  white-space: nowrap;
+}
+
+.checkboxRow {
+    margin-top: 1rem;
+  }
+  
+  .checkboxLabel {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    color: #ddd;
+    font-weight: 500;
+    user-select: none;
+  }
+  
+  .checkboxLabel input[type="checkbox"] {
+    margin: 0;
+    transform: scale(1.1);
+    cursor: pointer;
+  }
+
+  .currentAssignee {
+    font-size: 0.85rem;
+    color: #ccc;
+    margin-bottom: 0.5rem;
+  }  
+  
+  
   .priority.low { background-color: #8fc8ff; color: #000; }
   .priority.medium { background-color: #ffd88f; color: #000; }
   .priority.high { background-color: #ff8f8f; color: #000; }

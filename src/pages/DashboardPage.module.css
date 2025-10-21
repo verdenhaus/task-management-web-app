@@ -13,12 +13,34 @@
     margin-bottom: 2rem;
   }
   
+  .headerButtons {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+  }
+  
   button {
     padding: 0.5rem 1rem;
     border-radius: 6px;
     border: none;
     cursor: pointer;
     font-weight: bold;
+    background: #a69eff;
+    color: #1e1e2f;
+    transition: background-color 0.3s ease;
+  }
+  
+  button:hover {
+    background: #9585e6;
+  }
+  
+  .profileButton {
+    background: #2a2a3f;
+    color: #a69eff;
+    border: 2px solid #a69eff;
+  }
+  
+  .profileButton:hover {
     background: #a69eff;
     color: #1e1e2f;
   }
