@@ -162,6 +162,19 @@
     animation: dashFadeInOut 3s ease-in-out;
   }
 
+  .successPopup {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #4caf50;
+    color: white;
+    padding: 0.8rem 1.2rem;
+    border-radius: 6px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    z-index: 1000;
+  }
+  
+
   @keyframes dashFadeInOut {
     0% { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
     15% { opacity: 1; transform: translate(-50%, -50%) scale(1); }

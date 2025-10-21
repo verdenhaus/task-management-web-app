@@ -17,6 +17,9 @@ const DashboardPage = () => {
   const [showError, setShowError] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const token = localStorage.getItem('jwt');
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+
 
   useEffect(() => {
     if (!token) {
@@ -113,26 +116,39 @@ const DashboardPage = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
         savedTask = res.data;
+        setSuccessMessage('Task changes saved successfully');
+        setShowSuccess(true);
+        setTimeout(() => setShowSuccess(false), 3000);
       } else {
         const res = await axios.post('/api/tasks', taskData, {
           headers: { Authorization: `Bearer ${token}` },
         });
         savedTask = res.data;
+  
+        let assigneeUsername = '';
+        if (taskData.autoAssign) {
+          const assignRes = await axios.post(`/api/tasks/assign/${savedTask.id}`, {}, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          const assignedUserId = assignRes.data.assignedUserId;
+          const assignedUser = users.find(u => u.id === assignedUserId);
+          assigneeUsername = assignedUser ? assignedUser.username : 'someone';
+        } else if (taskData.assigneeId) {
+          const user = users.find(u => u.id === parseInt(taskData.assigneeId));
+          assigneeUsername = user?.username || 'someone';
+        }
+        
+  
+        setSuccessMessage(`Task saved and assigned to ${assigneeUsername}`);
+        setShowSuccess(true);
+        setTimeout(() => setShowSuccess(false), 3000);
       }
   
-      if (taskData.autoAssign) {
-        await axios.post(
-          `/api/tasks/assign/${savedTask.id}`,
-          {},
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-      }
-  
-      
       const tasksRes = await axios.get('/api/tasks', {
         headers: { Authorization: `Bearer ${token}` },
       });
       setTasks(tasksRes.data);
+  
     } catch (err) {
       console.error(err);
       alert('Failed to save task');
@@ -140,6 +156,8 @@ const DashboardPage = () => {
       setModalOpen(false);
     }
   };
+  
+  
   
 
   if (loading) return <p>Loading dashboard...</p>;
@@ -290,6 +308,7 @@ const DashboardPage = () => {
       )}
 
       {showError && <div className={styles.errorPopup}>{errorMessage}</div>}
+      {showSuccess && <div className={styles.successPopup}>{successMessage}</div>}
     </div>
   );
 };

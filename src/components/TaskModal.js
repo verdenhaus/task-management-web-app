@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import axios from 'axios';
 import styles from './TaskModal.module.css';
 
 const TaskModal = ({ task, users, onClose, onSave }) => {
+  const token = localStorage.getItem('jwt');
   const [form, setForm] = useState({
     title: task?.title || '',
     description: task?.description || '',
@@ -11,10 +13,28 @@ const TaskModal = ({ task, users, onClose, onSave }) => {
   });
   const [search, setSearch] = useState('');
   const [saving, setSaving] = useState(false);
+  const [assignedUsername, setAssignedUsername] = useState(task?.assignedUsername || 'Unknown');
 
   const filteredUsers = users.filter(u =>
     u.username.toLowerCase().includes(search.toLowerCase())
   );
+
+  useEffect(() => {
+    const fetchAssignedUsername = async () => {
+      if (task?.assignedUserId) {
+        try {
+          const res = await axios.get(`/api/users/${task.assignedUserId}`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          setAssignedUsername(res.data.username || 'Unknown');
+        } catch (err) {
+          console.error('Failed to fetch username:', err);
+          setAssignedUsername('Unknown');
+        }
+      }
+    };
+    fetchAssignedUsername();
+  }, [task, token]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -22,7 +42,6 @@ const TaskModal = ({ task, users, onClose, onSave }) => {
       alert("Title cannot be empty");
       return;
     }
-
     if (!form.autoAssign && !form.assigneeId) {
       alert("Select a user or enable auto-assign");
       return;
@@ -34,6 +53,7 @@ const TaskModal = ({ task, users, onClose, onSave }) => {
         ...form,
         id: task?.id,
         assignedUserId: form.autoAssign ? null : form.assigneeId,
+        assignedUsername,
       });
     } catch (err) {
       console.error(err);
@@ -49,17 +69,10 @@ const TaskModal = ({ task, users, onClose, onSave }) => {
         <h2>{task ? "Edit Task" : "Create Task"}</h2>
         <form onSubmit={handleSubmit} className={styles.form}>
           <label>Title</label>
-          <input
-            type="text"
-            value={form.title}
-            onChange={e => setForm({ ...form, title: e.target.value })}
-          />
+          <input type="text" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} />
 
           <label>Description</label>
-          <textarea
-            value={form.description}
-            onChange={e => setForm({ ...form, description: e.target.value })}
-          />
+          <textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} />
 
           <label>Priority</label>
           <select
@@ -74,43 +87,33 @@ const TaskModal = ({ task, users, onClose, onSave }) => {
 
           <div className={styles.checkboxRow}>
             <label className={styles.checkboxLabel}>
-                <input
-                type="checkbox"
-                checked={form.autoAssign}
-                onChange={e => setForm({ ...form, autoAssign: e.target.checked })}
-                />
-                Auto-assign
+              <input type="checkbox" checked={form.autoAssign} onChange={e => setForm({ ...form, autoAssign: e.target.checked })} />
+              Auto-assign
             </label>
-            </div>
+          </div>
 
-
-
-            {!form.autoAssign && (
-              <>
-                {task?.assignedUserId && (
-                  <p className={styles.currentAssignee}>
-                    Currently assigned to: <strong>{task.assignedUsername || 'Unknown'}</strong>
-                  </p>
-                )}
-                <input
-                  type="text"
-                  placeholder="Search user..."
-                  value={search}
-                  onChange={e => setSearch(e.target.value)}
-                  className={styles.searchInput}
-                />
-                <select
-                  value={form.assigneeId}
-                  onChange={e => setForm({ ...form, assigneeId: e.target.value })}
-                >
-                  <option value="">Select user</option>
-                  {filteredUsers.map(u => (
-                    <option key={u.id} value={u.id}>{u.username}</option>
-                  ))}
-                </select>
-              </>
-            )}
-
+          {!form.autoAssign && (
+            <>
+              {task?.assignedUserId && (
+                <p className={styles.currentAssignee}>
+                  Currently assigned to: <strong>{assignedUsername}</strong>
+                </p>
+              )}
+              <input
+                type="text"
+                placeholder="Search user..."
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                className={styles.searchInput}
+              />
+              <select value={form.assigneeId} onChange={e => setForm({ ...form, assigneeId: e.target.value })}>
+                <option value="">Select user</option>
+                {filteredUsers.map(u => (
+                  <option key={u.id} value={u.id}>{u.username}</option>
+                ))}
+              </select>
+            </>
+          )}
 
           <div className={styles.buttons}>
             <button type="submit" disabled={saving}>{saving ? "Saving..." : "Save"}</button>
