@@ -1,187 +1,116 @@
-# Task Management Web App — Backend
+# Task Management Web App
 
-A Spring Boot–based backend for a full-stack **Task Management Web Application**, built as part of university Full-Stack Development Labs.  
-This backend provides RESTful APIs for managing users, tasks, and authentication with JWT security.
+A full-stack task management application built with **Spring Boot** (backend) and **React** (frontend). Features include user authentication, task creation, auto-assign, Kanban-style task board, and status tracking.
 
----
+## Features
 
-## Project Overview
-
-This project serves as the **backend foundation (Lab 1)** of the Task Management Web App.  
-It handles:
-- User and Task management via JPA and Hibernate
-- REST APIs for CRUD operations
-- Automatic task assignment to available users
-- JWT-based authentication and authorization
-- Unit testing with JUnit and MockMvc (80%+ coverage)
+* User registration & login (JWT authentication)
+* Create, edit, delete tasks
+* Auto-assign tasks to users
+* Kanban board for task status (`Assigned`, `In Progress`, `Testing`, `Complete`)
+* Drag-and-drop task management
+* View tasks assigned to yourself or other users
 
 ---
 
-## Tech Stack
+## Backend (Spring Boot)
 
-| Layer | Technology |
-|--------|-------------|
-| Language | Java 17 |
-| Framework | Spring Boot 3 |
-| Build Tool | Maven |
-| Database | MySQL |
-| ORM | JPA / Hibernate |
-| Security | Spring Security + JWT |
-| Testing | JUnit 5, MockMvc |
-| IDE | IntelliJ IDEA |
+### Requirements
 
----
+* Java 17+
+* Maven
+* PostgreSQL (or your preferred database)
 
-## Entity-Relationship Diagram (ERD)
+### Setup
 
-```mermaid
-erDiagram
-    USER {
-        BIGINT id PK
-        STRING username
-        STRING email
-        STRING hashedPassword
-        STRING availabilityStatus
-    }
+1. Clone the repository:
 
-    TASK {
-        BIGINT id PK
-        STRING title
-        STRING description
-        STRING priorityLevel
-        DATETIME creationTimestamp
-        BIGINT assignedUserId FK
-    }
-
-    USER ||--o{ TASK : "owns"
-```
-### (This ER diagram shows a one-to-many relationship between User and Task — each user can own multiple tasks.)
-
-## Lab 1 Structure
-
-### Task 1: Project Setup & Health Check
-
-* Initialized Spring Boot project.
-* Added basic logging and `/health` endpoint to check DB connectivity.
-
-### Task 2: Database Modeling
-
-* Implemented JPA entities: User and Task.
-* Added one-to-many relationship (User → Tasks) with cascade delete.
-* Created repositories with custom queries and sample data initializer.
-
-### Task 3: REST APIs
-
-* Developed CRUD endpoints for `/api/users` and `/api/tasks`.
-* Added filtering (by priority, assignee).
-* Implemented `/api/tasks/assign/{id}` for automatic task assignment.
-* Added DTOs and global exception handling.
-
-### Task 4: Security and Testing
-
-* Integrated Spring Security with JWT-based authentication.
-* Added `/api/auth/register` and `/api/auth/login`.
-* Secured endpoints for authorized access only.
-* Wrote 5+ unit and integration tests (80% coverage).
-
-## Setup & Run Instructions
-
-### 1. Clone the repository
-
-```
-git clone https://github.com/<your-username>/task-management-web-app.git
-cd task-management-web-app
+```bash
+git clone https://github.com/verdenhaus/task-management-web-app.git
+cd task-management-web-app/backend
 ```
 
-### 2. Set up MySQL
-
-Create a database in MySQL:
-
-```sql
-CREATE DATABASE taskdb;
-```
-
-Update your `application.properties` file:
+2. Configure database connection in `application.properties`:
 
 ```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/taskdb
-spring.datasource.username=root
-spring.datasource.password=yourpassword
+spring.datasource.url=jdbc:postgresql://localhost:5432/taskdb
+spring.datasource.username=your_db_user
+spring.datasource.password=your_db_password
 spring.jpa.hibernate.ddl-auto=update
-spring.jpa.show-sql=true
 ```
 
-### 3. Run the backend
+3. Build and run the backend:
 
-```
+```bash
+mvn clean install
 mvn spring-boot:run
 ```
 
-The app will start at: [http://localhost:8080](http://localhost:8080)
+The backend API will be available at `http://localhost:8080/api`.
 
-## Example API Usage
+### API Endpoints (Highlights)
 
-### Register User
+* `POST /api/auth/login` – User login
+* `POST /api/auth/register` – User registration
+* `GET /api/users/me` – Get current logged-in user
+* `GET /api/tasks` – Get all tasks
+* `POST /api/tasks` – Create task
+* `PUT /api/tasks/{id}` – Update task
+* `POST /api/tasks/assign/{id}` – Auto-assign task
+* `POST /api/tasks/{id}/status` – Update task status
 
-**POST** `/api/auth/register`
+---
 
-```json
-{
-  "username": "john",
-  "email": "john@mail.com",
-  "password": "12345678"
-}
+## Frontend (React)
+
+### Requirements
+
+* Node.js 18+
+* npm or yarn
+
+### Setup
+
+1. Navigate to the frontend folder:
+
+```bash
+cd ../frontend
 ```
 
-### Login
+2. Install dependencies:
 
-**POST** `/api/auth/login`
-
-```json
-{
-  "email": "john@mail.com",
-  "password": "12345678"
-}
+```bash
+npm install
+# or
+yarn install
 ```
 
-→ Returns JWT token:
+3. Start the frontend server:
 
-```json
-{"token": "eyJhbGciOiJIUzI1NiJ9..."}
+```bash
+npm start
+# or
+yarn start
 ```
 
-### Create Task (Authorized)
+The app will open at `http://localhost:3000`.
 
-**POST** `/api/tasks`
-Headers: `Authorization: Bearer <token>`
+---
 
-```json
-{
-  "title": "Prepare report",
-  "description": "Weekly progress summary",
-  "priorityLevel": "HIGH"
-}
-```
+## Usage
 
-## Branching Strategy
+1. Open the frontend in your browser.
+2. Register a new account or log in.
+3. Create tasks using the modal form.
+4. Drag tasks between Kanban columns to update status.
+5. Auto-assign tasks will automatically assign them to available users.
+6. View other users’ tasks in their respective sections.
 
-* Main branch: `main`
-* Lab 1 backend branch: `lab-1-backend`
-* Future labs:
+---
 
-    * `lab-2-frontend`
-    * `lab-3-integration`
+## Notes
 
-**Merge workflow:**
+* Ensure backend is running on port `8080` when running frontend.
+* JWT token is stored in `localStorage` for authentication.
+* Both manual assignment and auto-assign display the correct username in popups.
 
-1. Develop on feature branch.
-2. Push commits.
-3. Open Pull Request titled: `"Lab 1: Backend Foundation Complete"`
-4. Use **Squash and Merge** for clean history.
-
-## Author
-
-**Dana Bakhtybay**
-IT2-2201, IITU
-GitHub: [@verdenhaus](https://github.com/verdenhaus)
-
+---
