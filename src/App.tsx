@@ -1,60 +1,51 @@
 import { useState } from 'react';
-import axios from 'axios';
-import { AgGridReact } from 'ag-grid-react';
-import { ColDef } from 'ag-grid-community';
-import { ICellRendererParams } from 'ag-grid-community';
-import 'ag-grid-community/styles/ag-grid.css';
-import 'ag-grid-community/styles/ag-theme-material.css';
-import './App.css';
+import Container from '@mui/material/Container';
+import AppBar from '@mui/material/AppBar';
+import Toolbar from '@mui/material/Toolbar';
+import Typography from '@mui/material/Typography';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemText from '@mui/material/ListItemText';
 
-type Repository = {
-  id: number;
-  full_name: string;
-  html_url: string;
-};
+import AddItem from './AddItem';
+
+import './App.css'
+
+export type Item = {
+  product: string;
+  amount: string;
+}
 
 function App() {
-  const [keyword, setKeyword] = useState('');
-  const [repodata, setRepodata] = useState<Repository[]>([]);
-
-  const handleClick = () => {
-    axios.get<{ items: Repository[] }>(`https://api.github.com/search/repositories?q=${keyword}`)
-    .then(response => setRepodata(response.data.items))
-    .catch(err => console.error(err));
+  const [items, setItems] = useState<Item[]>([]);
+  
+  const addItem = (item: Item) => {
+    setItems([item, ...items]);
   }
-  
-  const columnDefs: ColDef[] = [
-    { field: 'id', sortable: true, filter: true },
-    { field: 'full_name', sortable: true, filter: true },
-    { field: 'html_url', sortable: true, filter: true },
-    {
-      field: 'full_name',
-      cellRenderer: (params: ICellRendererParams) => (
-        <button
-          onClick={() => alert(params.value)}>
-          Press me
-        </button>
-      ),
-    },
-  ];
-  
-    
+
   return (
-    <>
-      <input
-        value={keyword}
-        onChange={e => setKeyword(e.target.value)} />
-      <button onClick={handleClick}>Fetch</button>
-      <div className="ag-theme-material" style={{height: 500, width: 850}}>
-        <AgGridReact
-          rowData={repodata}
-          columnDefs={columnDefs}
-          pagination={true}
-          paginationPageSize={8}
-        />
-      </div>
-    </>
+    <Container>
+      <AppBar position="static">
+        <Toolbar>
+          <Typography variant="h6">
+            Shopping List
+          </Typography>
+        </Toolbar>
+      </AppBar> 
+      <AddItem addItem={addItem}/>
+      <List>
+        {
+          items.map((item, index) =>
+            <ListItem key={index} divider>
+              <ListItemText
+                 primary={item.product}
+                 secondary={item.amount}/>
+            </ListItem>
+          )
+        }
+      </List>     
+    </Container>
   );
 }
 
-export default App;
+export default App
